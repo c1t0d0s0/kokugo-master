@@ -190,7 +190,7 @@ describe('ログインして記録をうつす', () => {
     const remote = cloud.data.get('alice')!;
     expect(remote.stamps).toHaveLength(7);
     expect(remote.clears).toHaveLength(7);
-    expect(remote.cards).toEqual([{ id: 'c01', paid: 40 }]);
+    expect(remote.cards).toEqual([{ id: 'km01', paid: 40 }]);
     expect(remote.progress[pid(today)].done).toBe(true);
     expect(currentUid()).toBe('alice');
     expect(balance()).toBe(7 * 150 + 500 - 40);
@@ -215,12 +215,12 @@ describe('ログインして記録をうつす', () => {
       ...emptySnapshot(),
       stamps: [addDays(today, -7)],
       clears: [dailyClearId(addDays(today, -7), 5), dailyClearId(today, 3)],
-      cards: [{ id: 'c02', paid: 80 }],
+      cards: [{ id: 'km02', paid: 80 }],
     });
     await a.sync.signIn();
     await a.sync.flush();
     expect(getStamps()).toHaveLength(8);
-    expect(getCards().map((c) => c.id).sort()).toEqual(['c01', 'c02']);
+    expect(getCards().map((c) => c.id).sort()).toEqual(['km01', 'km02']);
     // 同じ日の記録が 2 つあっても、よいほうだけを数える (今日は 10 問)
     expect(balance()).toBe(7 * 150 + 50 + 500 - 120);
   });

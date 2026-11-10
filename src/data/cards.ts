@@ -24,22 +24,49 @@ export type Item =
   | 'cap'
   | 'wizard'
   | 'crown'
-  | 'zzz';
+  | 'zzz'
+  // ---- ここから下は国語マスターのカードだけで使う持ち物 ----
+  | 'fude'
+  | 'hanko'
+  | 'fuda'
+  | 'tanzaku'
+  | 'sensu'
+  | 'jisho'
+  | 'suzuri'
+  | 'kasa'
+  | 'hokamuri'
+  | 'kanzashi'
+  | 'mic'
+  | 'kabuto'
+  | 'uchiwa'
+  | 'eboshi'
+  | 'kanmuri'
+  | 'ink'
+  | 'monocle'
+  | 'eri'
+  | 'medal';
 
+/** カードの背景。どれも国語マスターだけのもの (和のもようと、ことばにまつわる景色) */
 export type Background =
-  | 'paper'
-  | 'dots'
-  | 'grid'
-  | 'night'
-  | 'pink'
-  | 'sky'
-  | 'snow'
-  | 'sakura'
-  | 'notes'
-  | 'hanamaru'
-  | 'stars'
-  | 'rainbow'
-  | 'gold';
+  | 'hiragana'
+  | 'ichimatsu'
+  | 'tatami'
+  | 'tanabata'
+  | 'seigaiha'
+  | 'shoji'
+  | 'fuji'
+  | 'yagasuri'
+  | 'asanoha'
+  | 'kokuban'
+  | 'koinobori'
+  | 'hanabi'
+  | 'kasumi'
+  | 'enso'
+  | 'take'
+  | 'kinbyobu';
+
+/** カードのふち。墨 (ふつう)・朱 (めずらしい)・金 (とてもめずらしい) */
+export type Frame = 'sumi' | 'shu' | 'kin';
 
 export interface Card {
   id: string;
@@ -48,38 +75,33 @@ export interface Card {
   price: number;
   look: Look;
   bg: Background;
-  frame: 'plain' | 'silver' | 'gold';
+  frame: Frame;
 }
 
 /**
- * 値段の安い順。合計は 28,420pt。次のようになるように決めてある (tests/rewards.test.ts で確かめている)。
- * - 初級の今日のパズルを毎日クリアする人が、はじめの 5 枚を 2 週間以内に手に入れられる
- *   (1 日 20pt と、7 日つづくたびの 1000pt で、2・6・7・7・14 日目に買える)
- * - そのあとは、1 枚ごとに少しずつ時間がかかる
- * - いちばん多くポイントをもらう人 (初級・上級の今日のパズルを毎日、両方のステージを毎月ぜんぶ) でも、
- *   2 回目の「1 か月そろった」(5000pt) がないと全部は集まらず、77 日目より前にはそろわない。
- *   初級の今日のパズルだけの人は、全部集めるのに 3〜4 か月かかる
- * 値段を変えるときは、合計がこの条件から外れないように気をつけること。
+ * 値段の安い順。合計は 28,420pt (tests/quiz.test.ts で、集めるのにかかる日数を確かめている)。
+ * 絵柄は国語マスターだけのもの。Wordlynx・Reading Quest・漢字クイズのカードや着せかえにある
+ * 持ち物・背景・ふちは使わない (tests/cards.test.ts で確かめている)。
  */
 export const CARDS: Card[] = [
-  { id: 'c01', name: 'ヤマネコ', price: 40, look: {}, bg: 'paper', frame: 'plain' },
-  { id: 'c02', name: 'ウインク ヤマネコ', price: 80, look: { eyes: 'wink', mouth: 'smile' }, bg: 'dots', frame: 'plain' },
-  { id: 'c03', name: 'ねむねむ ヤマネコ', price: 300, look: { eyes: 'sleep', mouth: 'smile', items: ['zzz'] }, bg: 'night', frame: 'plain' },
-  { id: 'c04', name: 'にこにこ ヤマネコ', price: 500, look: { eyes: 'happy', mouth: 'open' }, bg: 'pink', frame: 'plain' },
-  { id: 'c05', name: 'リボンの ヤマネコ', price: 800, look: { items: ['ribbon'], fur: '#f1cf93' }, bg: 'dots', frame: 'plain' },
-  { id: 'c06', name: 'めがねの ヤマネコ', price: 1000, look: { items: ['glasses'], mouth: 'smile' }, bg: 'grid', frame: 'plain' },
-  { id: 'c07', name: 'えんぴつ ヤマネコ', price: 1100, look: { items: ['pencil'], eyes: 'brave', mouth: 'smile' }, bg: 'grid', frame: 'plain' },
-  { id: 'c08', name: 'ぼうしの ヤマネコ', price: 1200, look: { items: ['hat'], mouth: 'open', eyes: 'happy' }, bg: 'sky', frame: 'plain' },
-  { id: 'c09', name: 'マフラーの ヤマネコ', price: 1300, look: { items: ['scarf'], fur: '#d9a55b' }, bg: 'snow', frame: 'plain' },
-  { id: 'c10', name: '花の ヤマネコ', price: 1400, look: { items: ['flower'], eyes: 'wink', fur: '#f3c98b' }, bg: 'sakura', frame: 'plain' },
-  { id: 'c11', name: '本を 読む ヤマネコ', price: 1500, look: { items: ['glasses', 'book'], mouth: 'smile' }, bg: 'paper', frame: 'silver' },
-  { id: 'c12', name: 'はちまき ヤマネコ', price: 1600, look: { items: ['headband'], eyes: 'brave', mouth: 'open' }, bg: 'hanamaru', frame: 'silver' },
-  { id: 'c13', name: '雪の ヤマネコ', price: 1700, look: { fur: '#f3f1ea', light: '#ffffff', pink: '#f9c9c0', marks: 'spots', items: ['scarf'] }, bg: 'snow', frame: 'silver' },
-  { id: 'c14', name: '夜の ヤマネコ', price: 1800, look: { fur: '#6a6f96', light: '#d9dcf0', pink: '#b99bc4', eyeColor: '#ffd94a', marks: 'spots', mouth: 'smile' }, bg: 'night', frame: 'silver' },
-  { id: 'c15', name: '音楽の ヤマネコ', price: 1900, look: { items: ['headphones'], eyes: 'happy', mouth: 'open' }, bg: 'notes', frame: 'silver' },
-  { id: 'c16', name: 'やきゅう ヤマネコ', price: 2000, look: { items: ['cap'], eyes: 'brave', mouth: 'smile', fur: '#dba862' }, bg: 'sky', frame: 'silver' },
-  { id: 'c17', name: 'はなまる ヤマネコ', price: 2200, look: { eyes: 'sparkle', mouth: 'open', items: ['pencil'] }, bg: 'hanamaru', frame: 'gold' },
-  { id: 'c18', name: 'まほうの ヤマネコ', price: 2400, look: { items: ['wizard'], eyes: 'sparkle', mouth: 'smile', fur: '#cdb7ee', light: '#f6f0ff', pink: '#f3b6dc' }, bg: 'stars', frame: 'gold' },
-  { id: 'c19', name: 'にじの ヤマネコ', price: 2600, look: { eyes: 'sparkle', mouth: 'open', fur: '#fbe3a6', items: ['flower'] }, bg: 'rainbow', frame: 'gold' },
-  { id: 'c20', name: '王様の ヤマネコ', price: 3000, look: { items: ['crown'], eyes: 'sparkle', mouth: 'smile', fur: '#f0c260' }, bg: 'gold', frame: 'gold' },
+  { id: 'km01', name: 'ふでの ヤマネコ', price: 40, look: { items: ['fude'], mouth: 'smile' }, bg: 'hiragana', frame: 'sumi' },
+  { id: 'km02', name: 'はんこの ヤマネコ', price: 80, look: { items: ['hanko'], eyes: 'wink', mouth: 'smile' }, bg: 'ichimatsu', frame: 'sumi' },
+  { id: 'km03', name: 'かるたの ヤマネコ', price: 300, look: { items: ['fuda'], eyes: 'happy', mouth: 'open' }, bg: 'tatami', frame: 'sumi' },
+  { id: 'km04', name: 'たんざくの ヤマネコ', price: 500, look: { items: ['tanzaku'], eyes: 'sparkle', mouth: 'smile', fur: '#f1cf93' }, bg: 'tanabata', frame: 'sumi' },
+  { id: 'km05', name: 'せんすの ヤマネコ', price: 800, look: { items: ['sensu'], eyes: 'happy', mouth: 'smile' }, bg: 'seigaiha', frame: 'sumi' },
+  { id: 'km06', name: 'じしょを 引く ヤマネコ', price: 1000, look: { items: ['jisho'], eyes: 'brave', mouth: 'smile' }, bg: 'shoji', frame: 'sumi' },
+  { id: 'km07', name: 'すずりの ヤマネコ', price: 1100, look: { items: ['suzuri', 'ink'], eyes: 'wink', mouth: 'open', fur: '#d9a55b' }, bg: 'enso', frame: 'sumi' },
+  { id: 'km08', name: '旅を する ヤマネコ', price: 1200, look: { items: ['kasa'], mouth: 'smile', fur: '#dba862' }, bg: 'fuji', frame: 'sumi' },
+  { id: 'km09', name: 'ほおかむり ヤマネコ', price: 1300, look: { items: ['hokamuri'], eyes: 'happy', mouth: 'tongue' }, bg: 'yagasuri', frame: 'sumi' },
+  { id: 'km10', name: 'かんざしの ヤマネコ', price: 1400, look: { items: ['kanzashi', 'eri'], eyes: 'wink', mouth: 'smile', fur: '#f3c98b' }, bg: 'asanoha', frame: 'sumi' },
+  { id: 'km11', name: '音読の ヤマネコ', price: 1500, look: { items: ['mic'], eyes: 'happy', mouth: 'open' }, bg: 'kokuban', frame: 'shu' },
+  { id: 'km12', name: 'かぶとの ヤマネコ', price: 1600, look: { items: ['kabuto'], eyes: 'brave', mouth: 'open' }, bg: 'koinobori', frame: 'shu' },
+  { id: 'km13', name: 'なつまつりの ヤマネコ', price: 1700, look: { items: ['uchiwa', 'eri'], eyes: 'sparkle', mouth: 'open', fur: '#e3b268' }, bg: 'hanabi', frame: 'shu' },
+  { id: 'km14', name: 'えぼしの ヤマネコ', price: 1800, look: { items: ['eboshi', 'sensu'], mouth: 'smile', fur: '#cdb08a', light: '#fbf3e4' }, bg: 'kasumi', frame: 'shu' },
+  { id: 'km15', name: 'しょどうの ヤマネコ', price: 1900, look: { items: ['fude', 'ink'], eyes: 'brave', mouth: 'smile', fur: '#c9984a' }, bg: 'enso', frame: 'shu' },
+  { id: 'km16', name: 'はいくの ヤマネコ', price: 2000, look: { items: ['kasa', 'tanzaku'], eyes: 'sleep', mouth: 'smile', fur: '#b98d5e' }, bg: 'take', frame: 'shu' },
+  { id: 'km17', name: 'ことばの はかせ ヤマネコ', price: 2200, look: { items: ['monocle', 'jisho'], mouth: 'smile', fur: '#d8b27a' }, bg: 'kokuban', frame: 'kin' },
+  { id: 'km18', name: 'かぐやひめの ヤマネコ', price: 2400, look: { items: ['kanzashi', 'sensu'], eyes: 'sparkle', mouth: 'smile', fur: '#f6e6c4', light: '#ffffff', pink: '#f6b6c8', marks: 'none' }, bg: 'take', frame: 'kin' },
+  { id: 'km19', name: '百人一首の ヤマネコ', price: 2600, look: { items: ['kanmuri', 'fuda'], eyes: 'happy', mouth: 'smile', fur: '#e6c48a' }, bg: 'kasumi', frame: 'kin' },
+  { id: 'km20', name: '国語マスター ヤマネコ', price: 3000, look: { items: ['kanmuri', 'medal'], eyes: 'sparkle', mouth: 'open', fur: '#f0c260' }, bg: 'kinbyobu', frame: 'kin' },
 ];

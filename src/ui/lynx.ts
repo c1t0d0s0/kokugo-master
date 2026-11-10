@@ -1,5 +1,6 @@
-import type { Background, Card, Item, Look } from '../data/cards';
-import { h, hanamaruPoints } from './dom';
+import type { Card, Item, Look } from '../data/cards';
+import { KOKUGO_FRAMES, KOKUGO_HEADWEAR, KOKUGO_ITEMS, kokugoBackground } from './card-art';
+import { h } from './dom';
 
 // 目や輪郭は、画面の明暗に関係なくこの色にする (文字色に合わせると暗い画面で白目になる)
 const LINE = '#1c2a4a';
@@ -66,9 +67,11 @@ function mouth(look: Look): string {
 }
 
 // 頭の上にかぶるもの。これがあるときは、ひたいのもようをかかない
-const HEADWEAR: Item[] = ['hat', 'headband', 'cap', 'wizard', 'crown'];
+const HEADWEAR: Item[] = ['hat', 'headband', 'cap', 'wizard', 'crown', ...KOKUGO_HEADWEAR];
 
-const ITEMS: Record<Item, string> = {
+// 問題の画面のヤマネコが使う持ち物 (めがねなど) と、カードだけの持ち物 (card-art.ts)
+const ITEMS: Partial<Record<Item, string>> = {
+  ...KOKUGO_ITEMS,
   ribbon:
     `<g transform="translate(87 31) rotate(18)" stroke="${LINE}" stroke-width="2" stroke-linejoin="round" fill="${RED}">` +
     `<path d="M0 0L-14 -8.5V8.5Z"/><path d="M0 0L14 -8.5V8.5Z"/><circle r="4"/></g>`,
@@ -169,104 +172,10 @@ export const MOODS: Record<'start' | 'correct' | 'wrong' | 'think', Look> = {
   wrong: { eyes: 'sleep', mouth: 'smile', items: ['glasses'] },
 };
 
-// ---- カードの絵柄 (たて 156 × よこ 120) ----
+// ---- カードの絵柄 (たて 156 × よこ 120)。背景・ふち・カードの持ち物は card-art.ts ----
 
 const W = 120;
 const H = 156;
-const circles = (points: number[][], fill: string) =>
-  points.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}"/>`).join('');
-const fillRect = (fill: string) => `<rect width="${W}" height="${H}" fill="${fill}"/>`;
-
-function background(bg: Background): string {
-  switch (bg) {
-    case 'dots': {
-      const dots: number[][] = [];
-      for (let y = 0; y < 11; y++) for (let x = 0; x < 9; x++) dots.push([x * 15 + (y % 2) * 7.5, y * 15 + 6, 3.2]);
-      return fillRect('#fff5c2') + circles(dots, '#ffe36e');
-    }
-    case 'grid': {
-      let d = '';
-      for (let x = 12; x < W; x += 12) d += `M${x} 0V${H}`;
-      for (let y = 12; y < H; y += 12) d += `M0 ${y}H${W}`;
-      return fillRect('#f3faf6') + `<path d="${d}" stroke="#b9dccf" stroke-width="1" fill="none"/>`;
-    }
-    case 'night':
-      return (
-        fillRect('#27305a') +
-        `<circle cx="24" cy="24" r="11" fill="#ffe58a"/><circle cx="29" cy="20.5" r="10" fill="#27305a"/>` +
-        circles([[52, 14, 1.4], [76, 26, 1.1], [14, 60, 1.2], [108, 52, 1.5], [100, 140, 1.3], [16, 132, 1.5], [62, 148, 1.1]], '#fff') +
-        sparkle(90, 16, 4, '#ffe58a') +
-        sparkle(106, 100, 3, '#ffe58a')
-      );
-    case 'pink':
-      return fillRect('#ffe4ea') + circles([[18, 22, 13], [102, 34, 9], [96, 132, 16], [14, 120, 8], [60, 10, 6]], '#ffd0da');
-    case 'sky':
-      return (
-        fillRect('#cdeaf8') +
-        `<circle cx="98" cy="22" r="11" fill="${YELLOW}"/>` +
-        `<g fill="#fff"><ellipse cx="26" cy="22" rx="15" ry="6.5"/><ellipse cx="34" cy="17" rx="9" ry="6"/>` +
-        `<ellipse cx="92" cy="142" rx="17" ry="6.5"/><ellipse cx="20" cy="136" rx="12" ry="5"/></g>`
-      );
-    case 'snow':
-      return (
-        fillRect('#dcecf5') +
-        `<ellipse cx="60" cy="160" rx="90" ry="22" fill="#fff"/>` +
-        circles([[16, 16, 2.6], [44, 10, 1.8], [78, 20, 2.4], [104, 12, 1.9], [10, 58, 2], [110, 66, 2.6], [20, 104, 1.8], [102, 112, 2.2], [60, 24, 1.6]], '#fff')
-      );
-    case 'sakura': {
-      const petals = [[16, 18, 20], [42, 10, -30], [86, 16, 50], [106, 34, -10], [10, 70, 70], [112, 86, 30], [18, 128, -40], [98, 138, 15], [58, 146, -60], [70, 28, 80]];
-      return (
-        fillRect('#fdeaf0') +
-        petals.map(([x, y, a]) => `<ellipse cx="${x}" cy="${y}" rx="5" ry="3" fill="#f7a8bd" transform="rotate(${a} ${x} ${y})"/>`).join('')
-      );
-    }
-    case 'notes': {
-      const notes = [[12, 28, 18], [94, 22, 15], [104, 70, 13], [8, 96, 14], [92, 146, 18], [24, 148, 13]];
-      return (
-        fillRect('#e9f1ff') +
-        `<g fill="#7d94d6" font-family="sans-serif">` +
-        notes.map(([x, y, s]) => `<text x="${x}" y="${y}" font-size="${s}">♪</text>`).join('') +
-        `</g>`
-      );
-    }
-    case 'hanamaru':
-      return (
-        fillRect('#fdfdfa') +
-        `<polyline points="${hanamaruPoints()}" fill="none" stroke="#d63c2c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.38" transform="translate(-10 4) scale(1.4)"/>`
-      );
-    case 'stars':
-      return (
-        fillRect('#33285c') +
-        [[16, 18, 6], [100, 14, 4.5], [108, 70, 5], [10, 84, 4], [20, 140, 5], [98, 140, 6.5], [60, 12, 3]].map(([x, y, r]) => sparkle(x, y, r)).join('') +
-        circles([[40, 20, 1.2], [84, 30, 1], [112, 112, 1.3], [8, 116, 1.1]], '#fff')
-      );
-    case 'rainbow':
-      return (
-        fillRect('#eaf6ff') +
-        ['#f2666c', '#f7a23b', '#ffd93b', '#69c56e', '#4aa3e8', '#8b6fd6']
-          .map((c, i) => `<circle cx="60" cy="150" r="${112 - i * 9}" fill="none" stroke="${c}" stroke-width="9"/>`)
-          .join('') +
-        `<circle cx="60" cy="150" r="53.5" fill="#eaf6ff"/>`
-      );
-    case 'gold': {
-      let rays = '';
-      for (let i = 0; i < 12; i++) rays += `<path d="M60 84L${60 - 14} -40L${60 + 14} -40Z" fill="#f2d56a" transform="rotate(${i * 30} 60 84)"/>`;
-      return fillRect('#f8e9ad') + rays + sparkle(16, 20, 6, '#fff') + sparkle(104, 28, 4.5, '#fff') + sparkle(102, 136, 6, '#fff') + sparkle(18, 132, 4, '#fff');
-    }
-    default:
-      return fillRect('#fdfdfa') + `<rect x="8" y="8" width="104" height="140" rx="4" fill="none" stroke="#c5ddd3" stroke-width="1.2"/>`;
-  }
-}
-
-const FRAMES = {
-  plain: `<rect x="1.5" y="1.5" width="117" height="153" rx="7" fill="none" stroke="#6aa893" stroke-width="3"/>`,
-  silver:
-    `<rect x="2.5" y="2.5" width="115" height="151" rx="6.5" fill="none" stroke="#aeb8c4" stroke-width="5"/>` +
-    `<rect x="5.5" y="5.5" width="109" height="145" rx="4.5" fill="none" stroke="#f1f4f7" stroke-width="1.2"/>`,
-  gold:
-    `<rect x="2.5" y="2.5" width="115" height="151" rx="6.5" fill="none" stroke="#d9a520" stroke-width="5"/>` +
-    `<rect x="5.5" y="5.5" width="109" height="145" rx="4.5" fill="none" stroke="#fff3c4" stroke-width="1.2"/>`,
-};
 
 let clipSeq = 0;
 
@@ -276,8 +185,8 @@ export function cardSvg(card: Card): string {
   return (
     `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${card.name}">` +
     `<clipPath id="${clip}"><rect width="${W}" height="${H}" rx="8"/></clipPath>` +
-    `<g clip-path="url(#${clip})">${background(card.bg)}` +
+    `<g clip-path="url(#${clip})">${kokugoBackground(card.bg)}` +
     `<g transform="translate(9 37) scale(0.85)">${lynxFace({ fur: '#e9bd72', light: '#fff6e1', pink: '#f7b3a6', ...card.look })}</g>` +
-    `</g>${FRAMES[card.frame]}</svg>`
+    `</g>${KOKUGO_FRAMES[card.frame]}</svg>`
   );
 }

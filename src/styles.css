@@ -598,25 +598,24 @@ rt {
   height: 100%;
 }
 
-/* 裏面は全部のカードで同じ。原稿用紙のマス目のもよう */
+/* 裏面は全部のカードで同じ。朱色の市松もようと、金のふち (国語マスターだけの裏面) */
 .card-back {
   display: grid;
   place-items: center;
   border-radius: 6.5% / 5%;
-  background-color: #1c2a4a;
-  background-image:
-    linear-gradient(rgb(106 168 147 / 0.45) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(106 168 147 / 0.45) 1px, transparent 1px);
-  background-size: 14px 14px;
+  background-color: #b8352a;
+  background-image: conic-gradient(#9f2c22 25%, transparent 0 50%, #9f2c22 0 75%, transparent 0);
+  background-size: 18px 18px;
   background-position: center;
-  box-shadow: inset 0 0 0 3px #6aa893, inset 0 0 0 6px #1c2a4a;
+  box-shadow: inset 0 0 0 3px #e8c46a, inset 0 0 0 6px #b8352a, inset 0 0 0 7px #e8c46a;
 }
 
 .card-price {
   padding: 0.15rem 0.6rem;
   border-radius: 999px;
-  background: #fdfdfa;
-  color: #1c2a4a;
+  background: #fffaf0;
+  color: #8a2a20;
+  box-shadow: 0 0 0 2px #e8c46a;
   font-family: var(--hand);
   font-weight: 600;
   font-size: 1.125rem;

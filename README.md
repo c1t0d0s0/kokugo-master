@@ -46,6 +46,12 @@
 
 ポイントの合計は保存せず、記録から毎回計算します (`src/core/rewards.ts`)。
 
+カードの絵柄は国語マスターだけのもので、筆・はんこ・かるた札・烏帽子などの和の持ち物と、
+青海波・麻の葉・金屏風などの背景、墨・朱・金のふち、朱色の市松の裏面でかいています
+(種類と値段は `src/data/cards.ts`、絵は `src/ui/card-art.ts`)。
+Wordlynx・Reading Quest・漢字クイズの持ち物・背景・ふちを使っていないことは `tests/cards.test.ts` で確かめています。
+`npm run dev` で `http://localhost:5173/cards.html` を開くと、全部のカードを一覧できます (公開されるビルドには入りません)。
+
 ## 使い方
 
 ```sh
