@@ -169,11 +169,27 @@ export function addClear(id: string): void {
   if (!clears.includes(id)) write('clears', [...clears, id].sort());
 }
 
-export const unitClearId = (unitId: string, grade: Grade) => `unit-${unitId}-g${grade}`;
+/** 練習で全問正解したしるし (はなまる) の id。その日だけのしるしなので、日付を入れる */
+export const unitClearId = (unitId: string, grade: Grade, date: string) => `unit-${unitId}-g${grade}-${date}`;
 
-/** その単元の練習を、その学年で全問正解したことがあるか */
-export function unitCleared(unitId: string, grade: Grade): boolean {
-  return getClears().includes(unitClearId(unitId, grade));
+/** その単元の練習を、その学年で、今日 (today) 全問正解したか */
+export function unitCleared(unitId: string, grade: Grade, today: string): boolean {
+  return getClears().includes(unitClearId(unitId, grade, today));
+}
+
+/**
+ * もういらない記録か。単元のはなまるは、その日だけのしるしなので、前の日のもの (と、日付のない前の形) はいらない。
+ * 今日のチャレンジの記録 (daily-…) はポイントの計算に使うので、けっして消さない。
+ */
+export function isStaleClear(id: string, today: string): boolean {
+  return id.startsWith('unit-') && !id.endsWith(`-${today}`);
+}
+
+/** 前の日までの単元のはなまるを消す */
+export function pruneOldClears(today: string): void {
+  const clears = getClears();
+  const kept = clears.filter((id) => !isStaleClear(id, today));
+  if (kept.length !== clears.length) write('clears', kept);
 }
 
 export function getCards(): OwnedCard[] {

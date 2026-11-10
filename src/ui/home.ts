@@ -1,6 +1,6 @@
 import { jstDate } from '../core/date';
 import { buildDaily, dailyId, itemsSig } from '../core/quiz';
-import { balance, getClears, getGrade, getSound, loadProgress, pruneOldProgress, setGrade, setSound, unitCleared } from '../core/storage';
+import { balance, getClears, getGrade, getSound, loadProgress, pruneOldClears, pruneOldProgress, setGrade, setSound, unitCleared } from '../core/storage';
 import { GRADES, fitsGrade, type Grade } from '../core/types';
 import { AREAS, UNITS } from '../data/units';
 import { accountBox } from './account';
@@ -98,9 +98,9 @@ function withId<T extends HTMLElement>(el: T, id: string): T {
   return el;
 }
 
-function unitTile(unit: (typeof UNITS)[number], grade: Grade): HTMLElement {
+function unitTile(unit: (typeof UNITS)[number], grade: Grade, today: string): HTMLElement {
   const count = unit.questions.filter((q) => fitsGrade(q, grade)).length;
-  const done = unitCleared(unit.id, grade);
+  const done = unitCleared(unit.id, grade, today);
   const body = [
     rich('span', 'unit-name', unit.name),
     rich('span', 'unit-note', count > 0 ? unit.note : t.unitEmpty),
@@ -116,6 +116,7 @@ export function renderHome(root: HTMLElement): void {
   const grade = getGrade();
   const today = jstDate();
   pruneOldProgress(today);
+  pruneOldClears(today); // 単元のはなまるは、その日だけ
 
   const main: (HTMLElement | null)[] = [
     h(
@@ -148,7 +149,7 @@ export function renderHome(root: HTMLElement): void {
             'section',
             { class: `area area-${area.id}` },
             rich('h3', 'area-title', area.name),
-            h('div', { class: 'unit-grid' }, ...UNITS.filter((u) => u.area === area.id).map((u) => unitTile(u, grade))),
+            h('div', { class: 'unit-grid' }, ...UNITS.filter((u) => u.area === area.id).map((u) => unitTile(u, grade, today))),
           ),
         ),
       ),

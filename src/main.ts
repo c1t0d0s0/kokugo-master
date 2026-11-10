@@ -80,8 +80,9 @@ function startPractice(unitId: string, grade: Grade): () => void {
       title: `${TEXT.practiceTitle}：${unit.name}`,
       onFinish: async (results) => {
         const perfect = results.length === items.length && results.every((r) => r === 1);
-        const first = perfect && !unitCleared(unit.id, grade);
-        if (first) addClear(unitClearId(unit.id, grade));
+        const today = jstDate();
+        const first = perfect && !unitCleared(unit.id, grade, today);
+        if (first) addClear(unitClearId(unit.id, grade, today));
         if (perfect) await playClear(fxWords(items, results));
         openResult({ items, results, unitCleared: first, onRetry: run });
       },

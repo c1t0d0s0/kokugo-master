@@ -5,6 +5,7 @@ import {
   clearStore,
   exportSnapshot,
   importSnapshot,
+  isStaleClear,
   isStaleProgress,
   onStorageChange,
   rememberUid,
@@ -245,6 +246,8 @@ export class Sync {
     const today = jstDate();
     const stale = Object.keys(merged.progress).filter((id) => isStaleProgress(id, today));
     for (const id of stale) delete merged.progress[id];
+    // 前の日までの単元のはなまるも、もういらない (合わせた集合なので、ここで消さないと Firestore からもどってくる)
+    merged.clears = merged.clears.filter((id) => !isStaleClear(id, today));
 
     const localChanged = !sameSnapshot(merged, exportSnapshot());
     importSnapshot(merged);
@@ -280,6 +283,8 @@ export class Sync {
     const remote = await this.remote.loadSummary(uid);
     if (this.uid !== uid) return;
     const merged = mergeSnapshots(remote ?? emptySnapshot(), { ...local, progress: {} });
+    const today = jstDate();
+    merged.clears = merged.clears.filter((id) => !isStaleClear(id, today));
     if (!sameSummary(merged, local)) {
       importSnapshot(merged, { keepProgress: true });
       this.hooks.onData();

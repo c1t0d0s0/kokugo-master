@@ -16,9 +16,12 @@ import {
   getStamps,
   loadProgress,
   onStorageChange,
+  pruneOldClears,
   rememberedUid,
   saveProgress,
   setGrade,
+  unitClearId,
+  unitCleared,
   useStore,
 } from '../src/core/storage';
 import { CARDS } from '../src/data/cards';
@@ -320,5 +323,46 @@ describe('ログアウト', () => {
     expect(await a.sync.signOut(true)).toBe('ok');
     await a.sync.flush();
     expect(currentUid()).toBeNull();
+  });
+});
+
+describe('単元のはなまる (その日だけ)', () => {
+  const yesterday = addDays(today, -1);
+
+  it('今日つけたはなまるは見え、次の日には見えない', () => {
+    addClear(unitClearId('yoji', 4, today));
+    expect(unitCleared('yoji', 4, today)).toBe(true);
+    expect(unitCleared('yoji', 4, addDays(today, 1))).toBe(false);
+    expect(unitCleared('yoji', 5, today)).toBe(false);
+  });
+
+  it('ホームを開くと、前の日のはなまるは消え、今日のチャレンジの記録とポイントは残る', () => {
+    finish(yesterday, 10);
+    addClear(unitClearId('yoji', 4, yesterday));
+    addClear('unit-kanyoku-g4'); // 日付のない前の形
+    addClear(unitClearId('ruigi', 4, today));
+    pruneOldClears(today);
+    expect(getClears().sort()).toEqual([dailyClearId(yesterday, 10), unitClearId('ruigi', 4, today)].sort());
+    expect(balance()).toBe(150);
+  });
+
+  it('Firestore にある前の日のはなまるも、合わせたあとは手元にも Firestore にも残らない', async () => {
+    cloud.data.set('alice', {
+      ...emptySnapshot(),
+      clears: [dailyClearId(yesterday, 7), unitClearId('yoji', 4, yesterday), 'unit-kanyoku-g4', unitClearId('ruigi', 4, today)],
+    });
+    await a.sync.signIn();
+    await a.sync.flush();
+    const expected = [dailyClearId(yesterday, 7), unitClearId('ruigi', 4, today)].sort();
+    expect(getClears().sort()).toEqual(expected);
+    expect(cloud.data.get('alice')!.clears.slice().sort()).toEqual(expected);
+    expect(balance()).toBe(70);
+
+    // 変更を送るときも、Firestore に古いはなまるが入っていたら消してから書く
+    cloud.data.get('alice')!.clears.push(unitClearId('keigo', 5, yesterday));
+    addClear(unitClearId('keigo', 5, today));
+    await a.sync.flush();
+    expect(cloud.data.get('alice')!.clears).not.toContain(unitClearId('keigo', 5, yesterday));
+    expect(cloud.data.get('alice')!.clears).toContain(unitClearId('keigo', 5, today));
   });
 });

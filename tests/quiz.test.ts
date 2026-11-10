@@ -67,7 +67,7 @@ describe('ポイント', () => {
   });
 
   it('同じ日の記録は、よいほう 1 つだけ数える。練習はポイントにならない', () => {
-    expect(clearsPoints([dailyClearId('2026-11-10', 4), dailyClearId('2026-11-10', 9), dailyClearId('2026-11-11', 10), 'unit-yoji-g4'])).toBe(90 + 150);
+    expect(clearsPoints([dailyClearId('2026-11-10', 4), dailyClearId('2026-11-10', 9), dailyClearId('2026-11-11', 10), 'unit-yoji-g4-2026-11-10'])).toBe(90 + 150);
   });
 
   it('毎日全問正解しても、カードを全部集めるには 2 か月以上かかる', () => {
