@@ -1,0 +1,85 @@
+/** ヤマネコの絵柄の指定。指定しない項目は、タイトル画面のヤマネコと同じになる */
+export interface Look {
+  fur?: string;
+  light?: string;
+  pink?: string;
+  /** 目に色をつける (夜のヤマネコなど) */
+  eyeColor?: string;
+  eyes?: 'open' | 'wink' | 'sleep' | 'happy' | 'sparkle' | 'brave';
+  mouth?: 'tongue' | 'smile' | 'open';
+  marks?: 'stripes' | 'spots' | 'none';
+  items?: Item[];
+}
+
+export type Item =
+  | 'ribbon'
+  | 'glasses'
+  | 'pencil'
+  | 'hat'
+  | 'scarf'
+  | 'flower'
+  | 'book'
+  | 'headband'
+  | 'headphones'
+  | 'cap'
+  | 'wizard'
+  | 'crown'
+  | 'zzz';
+
+export type Background =
+  | 'paper'
+  | 'dots'
+  | 'grid'
+  | 'night'
+  | 'pink'
+  | 'sky'
+  | 'snow'
+  | 'sakura'
+  | 'notes'
+  | 'hanamaru'
+  | 'stars'
+  | 'rainbow'
+  | 'gold';
+
+export interface Card {
+  id: string;
+  /** 初級でも読めるよう、漢字は 3 年生までに習うものだけ */
+  name: string;
+  price: number;
+  look: Look;
+  bg: Background;
+  frame: 'plain' | 'silver' | 'gold';
+}
+
+/**
+ * 値段の安い順。合計は 28,420pt。次のようになるように決めてある (tests/rewards.test.ts で確かめている)。
+ * - 初級の今日のパズルを毎日クリアする人が、はじめの 5 枚を 2 週間以内に手に入れられる
+ *   (1 日 20pt と、7 日つづくたびの 1000pt で、2・6・7・7・14 日目に買える)
+ * - そのあとは、1 枚ごとに少しずつ時間がかかる
+ * - いちばん多くポイントをもらう人 (初級・上級の今日のパズルを毎日、両方のステージを毎月ぜんぶ) でも、
+ *   2 回目の「1 か月そろった」(5000pt) がないと全部は集まらず、77 日目より前にはそろわない。
+ *   初級の今日のパズルだけの人は、全部集めるのに 3〜4 か月かかる
+ * 値段を変えるときは、合計がこの条件から外れないように気をつけること。
+ */
+export const CARDS: Card[] = [
+  { id: 'c01', name: 'ヤマネコ', price: 40, look: {}, bg: 'paper', frame: 'plain' },
+  { id: 'c02', name: 'ウインク ヤマネコ', price: 80, look: { eyes: 'wink', mouth: 'smile' }, bg: 'dots', frame: 'plain' },
+  { id: 'c03', name: 'ねむねむ ヤマネコ', price: 300, look: { eyes: 'sleep', mouth: 'smile', items: ['zzz'] }, bg: 'night', frame: 'plain' },
+  { id: 'c04', name: 'にこにこ ヤマネコ', price: 500, look: { eyes: 'happy', mouth: 'open' }, bg: 'pink', frame: 'plain' },
+  { id: 'c05', name: 'リボンの ヤマネコ', price: 800, look: { items: ['ribbon'], fur: '#f1cf93' }, bg: 'dots', frame: 'plain' },
+  { id: 'c06', name: 'めがねの ヤマネコ', price: 1000, look: { items: ['glasses'], mouth: 'smile' }, bg: 'grid', frame: 'plain' },
+  { id: 'c07', name: 'えんぴつ ヤマネコ', price: 1100, look: { items: ['pencil'], eyes: 'brave', mouth: 'smile' }, bg: 'grid', frame: 'plain' },
+  { id: 'c08', name: 'ぼうしの ヤマネコ', price: 1200, look: { items: ['hat'], mouth: 'open', eyes: 'happy' }, bg: 'sky', frame: 'plain' },
+  { id: 'c09', name: 'マフラーの ヤマネコ', price: 1300, look: { items: ['scarf'], fur: '#d9a55b' }, bg: 'snow', frame: 'plain' },
+  { id: 'c10', name: '花の ヤマネコ', price: 1400, look: { items: ['flower'], eyes: 'wink', fur: '#f3c98b' }, bg: 'sakura', frame: 'plain' },
+  { id: 'c11', name: '本を 読む ヤマネコ', price: 1500, look: { items: ['glasses', 'book'], mouth: 'smile' }, bg: 'paper', frame: 'silver' },
+  { id: 'c12', name: 'はちまき ヤマネコ', price: 1600, look: { items: ['headband'], eyes: 'brave', mouth: 'open' }, bg: 'hanamaru', frame: 'silver' },
+  { id: 'c13', name: '雪の ヤマネコ', price: 1700, look: { fur: '#f3f1ea', light: '#ffffff', pink: '#f9c9c0', marks: 'spots', items: ['scarf'] }, bg: 'snow', frame: 'silver' },
+  { id: 'c14', name: '夜の ヤマネコ', price: 1800, look: { fur: '#6a6f96', light: '#d9dcf0', pink: '#b99bc4', eyeColor: '#ffd94a', marks: 'spots', mouth: 'smile' }, bg: 'night', frame: 'silver' },
+  { id: 'c15', name: '音楽の ヤマネコ', price: 1900, look: { items: ['headphones'], eyes: 'happy', mouth: 'open' }, bg: 'notes', frame: 'silver' },
+  { id: 'c16', name: 'やきゅう ヤマネコ', price: 2000, look: { items: ['cap'], eyes: 'brave', mouth: 'smile', fur: '#dba862' }, bg: 'sky', frame: 'silver' },
+  { id: 'c17', name: 'はなまる ヤマネコ', price: 2200, look: { eyes: 'sparkle', mouth: 'open', items: ['pencil'] }, bg: 'hanamaru', frame: 'gold' },
+  { id: 'c18', name: 'まほうの ヤマネコ', price: 2400, look: { items: ['wizard'], eyes: 'sparkle', mouth: 'smile', fur: '#cdb7ee', light: '#f6f0ff', pink: '#f3b6dc' }, bg: 'stars', frame: 'gold' },
+  { id: 'c19', name: 'にじの ヤマネコ', price: 2600, look: { eyes: 'sparkle', mouth: 'open', fur: '#fbe3a6', items: ['flower'] }, bg: 'rainbow', frame: 'gold' },
+  { id: 'c20', name: '王様の ヤマネコ', price: 3000, look: { items: ['crown'], eyes: 'sparkle', mouth: 'smile', fur: '#f0c260' }, bg: 'gold', frame: 'gold' },
+];
