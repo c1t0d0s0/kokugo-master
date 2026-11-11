@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Sync, type AuthPort, type Remote, type SyncHooks } from '../src/cloud/sync';
 import { addDays, jstDate } from '../src/core/date';
-import { dailyClearId } from '../src/core/rewards';
+import { dailyClearId, practiceClearId } from '../src/core/rewards';
 import { emptySnapshot, type Snapshot } from '../src/core/snapshot';
 import {
   addClear,
@@ -20,6 +20,7 @@ import {
   rememberedUid,
   saveProgress,
   setGrade,
+  practiceEarned,
   unitClearId,
   unitCleared,
   useStore,
@@ -364,5 +365,26 @@ describe('単元のはなまる (その日だけ)', () => {
     await a.sync.flush();
     expect(cloud.data.get('alice')!.clears).not.toContain(unitClearId('keigo', 5, yesterday));
     expect(cloud.data.get('alice')!.clears).toContain(unitClearId('keigo', 5, today));
+  });
+});
+
+describe('単元の練習のポイント', () => {
+  it('前の日の記録も消されず、ログインして合わせたあともポイントが残る', async () => {
+    const yesterday = addDays(today, -1);
+    cloud.data.set('alice', { ...emptySnapshot(), clears: [practiceClearId(yesterday, 'kanyoku', 7)] });
+    a.auth.resolve(null);
+    await a.sync.flush();
+    addClear(practiceClearId(yesterday, 'yoji', 5));
+    pruneOldClears(today);
+    expect(balance()).toBe(5);
+    await a.sync.signIn();
+    await a.sync.flush();
+    expect(balance()).toBe(12);
+    expect(cloud.data.get('alice')!.clears.slice().sort()).toEqual([practiceClearId(yesterday, 'kanyoku', 7), practiceClearId(yesterday, 'yoji', 5)].sort());
+    // 今日はまだもらっていない。もらったら、その単元は今日はもうもらえない
+    expect(practiceEarned('kanyoku', today)).toBe(false);
+    addClear(practiceClearId(today, 'kanyoku', 10));
+    expect(practiceEarned('kanyoku', today)).toBe(true);
+    expect(practiceEarned('yoji', today)).toBe(false);
   });
 });

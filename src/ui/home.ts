@@ -1,6 +1,7 @@
 import { jstDate } from '../core/date';
 import { buildDaily, dailyId, itemsSig } from '../core/quiz';
-import { balance, getClears, getGrade, getSound, loadProgress, pruneOldClears, pruneOldProgress, setGrade, setSound, unitCleared } from '../core/storage';
+import { balance, getClears, getGrade, getSound, loadProgress, practiceEarned, pruneOldClears, pruneOldProgress, setGrade, setSound, unitCleared } from '../core/storage';
+import { DAILY_COUNT } from '../core/rewards';
 import { GRADES, fitsGrade, type Grade } from '../core/types';
 import { AREAS, UNITS } from '../data/units';
 import { accountBox } from './account';
@@ -104,7 +105,15 @@ function unitTile(unit: (typeof UNITS)[number], grade: Grade, today: string): HT
   const body = [
     rich('span', 'unit-name', unit.name),
     rich('span', 'unit-note', count > 0 ? unit.note : t.unitEmpty),
-    count > 0 ? h('span', { class: 'unit-count' }, t.questions(count)) : null,
+    count > 0
+      ? h(
+          'span',
+          { class: 'unit-foot' },
+          // 今日まだポイントをもらっていない単元にだけ、もらえるポイントを出す
+          practiceEarned(unit.id, today) ? null : h('span', { class: 'unit-chip' }, t.practiceChip(Math.min(count, DAILY_COUNT))),
+          h('span', { class: 'unit-count' }, t.questions(count)),
+        )
+      : null,
     done ? hanamaru('hanamaru hanamaru-small') : null,
   ];
   return count > 0

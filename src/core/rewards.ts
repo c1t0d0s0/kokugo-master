@@ -11,9 +11,14 @@ export const WEEK_POINTS = 500;
 /** その月の 1 日から末日まで、すべてスタンプがそろうともらえるポイント */
 export const MONTH_POINTS = 3000;
 export const WEEK_LENGTH = 7;
+/** 単元の練習で 1 問正解するごとにもらえるポイント (1 つの単元で 1 日 1 回) */
+export const PRACTICE_POINTS = 1;
 
 /** 今日のチャレンジの記録の id。正解の数を id に入れておく (daily-2026-11-10:8) */
 export const dailyClearId = (date: string, correct: number) => `daily-${date}:${correct}`;
+
+/** 単元の練習の記録の id。学年は入れない (学年をかえても、1 つの単元で 1 日 1 回) */
+export const practiceClearId = (date: string, unitId: string, correct: number) => `practice-${date}-${unitId}:${correct}`;
 
 /** 今日のチャレンジを、その正解の数で終えたときのポイント */
 export function scorePoints(correct: number): number {
@@ -24,16 +29,21 @@ export function scorePoints(correct: number): number {
 /**
  * やりとげた記録から、もらったポイントを計算する。
  * 今日のチャレンジは 1 日 1 回分だけ数える (2 台で同じ日に遊んで記録が 2 つあっても、いちばんよいほう)。
- * 練習 (unit-…) ではポイントはもらえない。
+ * 単元の練習 (practice-…) は、正解 1 問 1pt。1 つの単元で 1 日 1 回分だけ数える (記録が 2 つあれば、よいほう)。
+ * 単元のはなまる (unit-…) は、ポイントにはならない。
  */
 export function clearsPoints(clears: readonly string[]): number {
-  const best = new Map<string, number>();
+  const daily = new Map<string, number>();
+  const practice = new Map<string, number>();
   for (const id of clears) {
-    const m = id.match(/^daily-(\d{4}-\d{2}-\d{2}):(\d+)$/);
-    if (m) best.set(m[1], Math.max(best.get(m[1]) ?? 0, Number(m[2])));
+    const d = id.match(/^daily-(\d{4}-\d{2}-\d{2}):(\d+)$/);
+    if (d) daily.set(d[1], Math.max(daily.get(d[1]) ?? 0, Number(d[2])));
+    const p = id.match(/^(practice-\d{4}-\d{2}-\d{2}-[a-z]+):(\d+)$/);
+    if (p) practice.set(p[1], Math.max(practice.get(p[1]) ?? 0, Math.min(DAILY_COUNT, Number(p[2]))));
   }
   let sum = 0;
-  for (const n of best.values()) sum += scorePoints(n);
+  for (const n of daily.values()) sum += scorePoints(n);
+  for (const n of practice.values()) sum += n * PRACTICE_POINTS;
   return sum;
 }
 

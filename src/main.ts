@@ -2,13 +2,14 @@ import './styles.css';
 import { restoreStore, startCloud } from './cloud';
 import { jstDate } from './core/date';
 import { buildDaily, buildPractice, dailyId, itemsSig, type Item } from './core/quiz';
-import { dailyClearId, scorePoints } from './core/rewards';
+import { PRACTICE_POINTS, dailyClearId, practiceClearId, scorePoints } from './core/rewards';
 import {
   addClear,
   addStamp,
   applyGrade,
   getGrade,
   loadProgress,
+  practiceEarned,
   saveProgress,
   unitClearId,
   unitCleared,
@@ -79,12 +80,24 @@ function startPractice(unitId: string, grade: Grade): () => void {
       items,
       title: `${TEXT.practiceTitle}：${unit.name}`,
       onFinish: async (results) => {
-        const perfect = results.length === items.length && results.every((r) => r === 1);
         const today = jstDate();
+        const finished = results.length === items.length;
+        const correct = results.filter((r) => r === 1).length;
+        const perfect = finished && correct === items.length;
         const first = perfect && !unitCleared(unit.id, grade, today);
         if (first) addClear(unitClearId(unit.id, grade, today));
+        // ポイントは、1 つの単元で 1 日 1 回 (その日のはじめの 1 回)。正解 1 問 1pt
+        const already = practiceEarned(unit.id, today);
+        if (finished && !already) addClear(practiceClearId(today, unit.id, correct));
         if (perfect) await playClear(fxWords(items, results));
-        openResult({ items, results, unitCleared: first, onRetry: run });
+        openResult({
+          items,
+          results,
+          unitCleared: first,
+          practicePoints: finished && !already ? correct * PRACTICE_POINTS : undefined,
+          practiceAlready: finished && already,
+          onRetry: run,
+        });
       },
     });
   };

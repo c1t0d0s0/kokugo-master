@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { addDays } from '../src/core/date';
 import { buildDaily, buildPractice, shuffledOptions } from '../src/core/quiz';
-import { clearsPoints, dailyClearId, scorePoints } from '../src/core/rewards';
+import { clearsPoints, dailyClearId, practiceClearId, scorePoints } from '../src/core/rewards';
 import { GRADES, fitsGrade } from '../src/core/types';
 import { CARDS } from '../src/data/cards';
 import { UNITS } from '../src/data/units';
@@ -70,10 +70,25 @@ describe('ポイント', () => {
     expect(clearsPoints([dailyClearId('2026-11-10', 4), dailyClearId('2026-11-10', 9), dailyClearId('2026-11-11', 10), 'unit-yoji-g4-2026-11-10'])).toBe(90 + 150);
   });
 
-  it('毎日全問正解しても、カードを全部集めるには 2 か月以上かかる', () => {
+  it('練習は正解 1 問 1pt。1 つの単元で 1 日 1 回分だけ', () => {
+    const d = '2026-11-11';
+    expect(clearsPoints([practiceClearId(d, 'kanyoku', 7)])).toBe(7);
+    // 2 台で同じ日・同じ単元をやって記録が 2 つあっても、よいほう 1 つだけ
+    expect(clearsPoints([practiceClearId(d, 'kanyoku', 7), practiceClearId(d, 'kanyoku', 9)])).toBe(9);
+    // 別の単元・別の日は、別に数える
+    expect(clearsPoints([practiceClearId(d, 'kanyoku', 7), practiceClearId(d, 'yoji', 10), practiceClearId('2026-11-12', 'kanyoku', 5)])).toBe(22);
+    // チャレンジといっしょでも、それぞれ数える。はなまるは 0pt
+    expect(clearsPoints([dailyClearId(d, 8), practiceClearId(d, 'yoji', 4), `unit-yoji-g4-${d}`])).toBe(84);
+  });
+
+  it('カードを全部集めるには時間がかかる (練習で毎日 16 単元ぜんぶやっても 1.5 か月より長く、ふつうに遊べば 2 か月以上)', () => {
     const total = CARDS.reduce((s, c) => s + c.price, 0);
-    const perMonth = 30 * 150 + 4 * 500 + 3000;
-    expect(total / perMonth).toBeGreaterThan(2);
+    const bonus = 4 * 500 + 3000;
+    const most = 30 * (150 + UNITS.length * 10) + bonus;
+    expect(total / most).toBeGreaterThan(1.5);
+    // チャレンジを毎日全問正解し、練習を 1 日 3 単元
+    const usual = 30 * (150 + 3 * 10) + bonus;
+    expect(total / usual).toBeGreaterThan(2);
     // はじめのカードは 1 日目に手に入る
     expect(CARDS[0].price).toBeLessThanOrEqual(scorePoints(5));
   });

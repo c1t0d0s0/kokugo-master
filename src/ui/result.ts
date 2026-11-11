@@ -1,4 +1,5 @@
 import type { Item } from '../core/quiz';
+import type { Question } from '../core/types';
 import type { StampReward } from '../core/rewards';
 import { balance } from '../core/storage';
 import { h, hanamaru, present, rich } from './dom';
@@ -16,8 +17,28 @@ export interface ResultInfo {
   already?: boolean;
   /** 練習で全問正解して、はなまるがついた */
   unitCleared?: boolean;
+  /** 単元の練習でもらったポイント (その単元で、その日のはじめの 1 回だけ) */
+  practicePoints?: number;
+  /** その単元の練習のポイントは、今日はもうもらっていた */
+  practiceAlready?: boolean;
   /** 「もう一ど」をおしたとき */
   onRetry?: () => void;
+}
+
+/**
+ * ふりかえりに出す問題の文。
+ * 空らんのある文 (慣用句のかるた・つなぎ言葉など) は、問い (「＿＿に 入る 札を とろう」) は出さず、
+ * 空らんに正解を入れた文だけを出す。空らんが 2 つあり、正解が「は・へ」のような形なら、前から順に入れる。
+ */
+function reviewQuestion(q: Question): HTMLElement {
+  const text = 'text' in q ? q.text : undefined;
+  const blanks = text ? text.split('＿＿').length - 1 : 0;
+  if (text && blanks > 0 && (q.kind === 'choice' || q.kind === 'karuta')) {
+    const answer = q.options[0];
+    const parts = blanks > 1 ? answer.split('・') : [answer];
+    if (parts.length === blanks) return rich('p', 'review-q is-filled', text, parts);
+  }
+  return rich('p', 'review-q', text && [...text].length < 30 ? `${q.prompt}　${text}` : q.prompt);
 }
 
 /** 全部答えたあとの、けっかとふりかえり */
@@ -25,7 +46,7 @@ export function openResult(info: ResultInfo): void {
   const score = info.results.filter((r) => r === 1).length;
   const n = info.items.length;
   const stamp = info.stamp?.added ? info.stamp : undefined;
-  const gained = (info.scorePoints ?? 0) + (stamp ? stamp.weekPoints + stamp.monthPoints : 0);
+  const gained = (info.scorePoints ?? 0) + (info.practicePoints ?? 0) + (stamp ? stamp.weekPoints + stamp.monthPoints : 0);
 
   const rewards: (HTMLElement | null)[] = [
     info.scorePoints ? h('p', { class: 'result-reward' }, t.rewardScore(info.scorePoints)) : null,
@@ -34,6 +55,8 @@ export function openResult(info: ResultInfo): void {
     stamp && stamp.weekPoints > 0 ? h('p', { class: 'result-reward' }, t.rewardWeek(stamp.run)) : null,
     stamp && stamp.monthPoints > 0 ? h('p', { class: 'result-reward' }, t.rewardMonth(info.month ?? 0)) : null,
     info.already ? h('p', { class: 'result-note' }, t.alreadyDone) : null,
+    info.practicePoints ? h('p', { class: 'result-reward' }, t.rewardPractice(info.practicePoints)) : null,
+    info.practiceAlready ? h('p', { class: 'result-note' }, t.practiceAlready) : null,
     info.unitCleared ? h('p', { class: 'result-stamp-title' }, t.unitCleared) : null,
   ];
   const rewardBox = rewards.some(Boolean)
@@ -57,7 +80,7 @@ export function openResult(info: ResultInfo): void {
         h(
           'div',
           {},
-          rich('p', 'review-q', q.kind === 'karuta' || ('text' in q && q.text && [...q.text].length < 30) ? `${q.prompt}　${q.text ?? ''}` : q.prompt),
+          reviewQuestion(q),
           rich('p', 'review-a', t.correctIs(answerText(q))),
           rich('p', 'review-explain', q.kind === 'karuta' ? q.meaning : q.explain),
         ),

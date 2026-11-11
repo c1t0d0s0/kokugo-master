@@ -32,13 +32,19 @@ const escapeHtml = (s: string) =>
  */
 const rubyOnly = (html: string) => html.replace(/([一-龠々ヶ]+)\(([ぁ-んー]+)\)/g, '<ruby>$1<rt>$2</rt></ruby>');
 
-export function richHtml(text: string, fill?: string): string {
+/** fill をわたすと、空らんにその字を入れる。空らんがいくつかあるときは、配列で前から順に入れる */
+export function richHtml(text: string, fill?: string | string[]): string {
+  const fills = fill === undefined ? [] : Array.isArray(fill) ? fill : [fill];
+  let i = 0;
   return rubyOnly(escapeHtml(text))
     .replace(/［(.*?)］/g, '<b class="hl">$1</b>')
-    .replace(/＿＿/g, fill === undefined ? '<span class="blank" aria-label="空らん"></span>' : `<span class="blank is-filled">${rubyOnly(escapeHtml(fill))}</span>`);
+    .replace(/＿＿/g, () => {
+      const f = fill === undefined ? undefined : (fills[i++] ?? fills[fills.length - 1]);
+      return f === undefined ? '<span class="blank" aria-label="空らん"></span>' : `<span class="blank is-filled">${rubyOnly(escapeHtml(f))}</span>`;
+    });
 }
 
-export function rich<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text: string, fill?: string) {
+export function rich<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text: string, fill?: string | string[]) {
   const el = h(tag, cls ? { class: cls } : {});
   el.innerHTML = richHtml(text, fill);
   return el;

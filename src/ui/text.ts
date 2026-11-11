@@ -1,4 +1,4 @@
-import { CORRECT_POINTS, DAILY_COUNT, MONTH_POINTS, PERFECT_POINTS, WEEK_LENGTH, WEEK_POINTS } from '../core/rewards';
+import { CORRECT_POINTS, DAILY_COUNT, MONTH_POINTS, PERFECT_POINTS, PRACTICE_POINTS, WEEK_LENGTH, WEEK_POINTS } from '../core/rewards';
 
 // 画面の文言。1 年生も読めるよう、ひらがなを多くし、むずかしい漢字には「漢字(かんじ)」でふりがなを付ける
 // (rich() で表示する文だけ。ボタンなどの短い文は、ひらがなと 1〜2 年生の漢字だけで書く)
@@ -24,7 +24,7 @@ export const TEXT = {
   resume: 'つづきから',
   review: 'もう一ど とく',
   unitsTitle: 'たんげんを えらんで れんしゅう',
-  unitsNote: 'れんしゅうでは ポイントは もらえないけど、ぜんぶ せいかいすると、その 日は はなまるが つくよ',
+  unitsNote: `れんしゅうでも、せいかい 1問で ${pt(PRACTICE_POINTS)} (1つの たんげんで 1日 1回)。ぜんぶ せいかいすると、その 日は はなまるが つくよ`,
   unitEmpty: 'この 学年の 問題(もんだい)は まだ ないよ',
   questions: (n: number) => `${n}問`,
   howto: 'あそびかた',
@@ -33,7 +33,8 @@ export const TEXT = {
     'チャレンジを さいごまで やると、スタンプカードに はなまるが おされるよ',
     `${WEEK_LENGTH}日 つづけるたびに ${pt(WEEK_POINTS)}、1か月 ぜんぶ そろうと ${pt(MONTH_POINTS)}`,
     'ためた ポイントで ヤマネコカードと こうかんできるよ',
-    'たんげんの れんしゅうは なんかいでも できるよ。ぜんぶ せいかいで つく はなまるは、つぎの 日に きえるよ',
+    `たんげんの れんしゅうは なんかいでも できるよ。ポイントは せいかい 1問で ${pt(PRACTICE_POINTS)} (1つの たんげんで 1日 1回)`,
+    'れんしゅうで ぜんぶ せいかいすると はなまるが つくよ。はなまるは つぎの 日に きえるよ',
     'URL に ?grade=3 と つけると、3年生で ひらけるよ',
   ],
   soundOn: '音：オン',
@@ -67,6 +68,9 @@ export const TEXT = {
   stampDone: 'スタンプカードに はなまるが おされたよ',
   alreadyDone: 'きょうの ポイントは もう もらったよ (こたえなおしても ふえないよ)',
   unitCleared: 'ぜんもん せいかいで、きょうの はなまるが ついたよ',
+  rewardPractice: (p: number) => `れんしゅうで +${pt(p)}`,
+  practiceAlready: 'この たんげんの ポイントは、きょうは もう もらったよ',
+  practiceChip: (n: number) => `きょう +${pt(n * PRACTICE_POINTS)} まで`,
   retry: 'もう一ど',
   reviewTitle: 'ふりかえり',
   // スタンプ・ポイント・カード

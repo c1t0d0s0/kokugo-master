@@ -185,6 +185,11 @@ export function isStaleClear(id: string, today: string): boolean {
   return id.startsWith('unit-') && !id.endsWith(`-${today}`);
 }
 
+/** その単元の練習で、今日 (today) もうポイントをもらったか (1 つの単元で 1 日 1 回) */
+export function practiceEarned(unitId: string, today: string): boolean {
+  return getClears().some((id) => id.startsWith(`practice-${today}-${unitId}:`));
+}
+
 /** 前の日までの単元のはなまるを消す */
 export function pruneOldClears(today: string): void {
   const clears = getClears();

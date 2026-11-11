@@ -30,7 +30,7 @@ export interface Settings {
 export interface Snapshot {
   /** 今日のチャレンジを終えた日 */
   stamps: string[];
-  /** やりとげたもの。今日のチャレンジ (daily-YYYY-MM-DD:正解数) と、その日に練習で全問正解した単元 (unit-単元-g学年-YYYY-MM-DD。前の日のものは消す) */
+  /** やりとげたもの。今日のチャレンジ (daily-YYYY-MM-DD:正解数) と、単元の練習のポイント (practice-YYYY-MM-DD-単元:正解数)、その日に練習で全問正解した単元 (unit-単元-g学年-YYYY-MM-DD。前の日のものは消す) */
   clears: string[];
   cards: OwnedCard[];
   /** カードのほかにポイントを使ったもの (今は使っていない。形をそろえるために残す) */
